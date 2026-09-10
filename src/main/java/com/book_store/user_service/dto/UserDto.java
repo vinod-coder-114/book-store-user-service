@@ -12,8 +12,9 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
     private String id;
-    @NotBlank(message = "Name is mandatory")
-    private String name;
+    @NotBlank(message = "First Name is mandatory")
+    private String first_name;
+    private String last_name;
     @NotBlank(message = "Email is mandatory")
     @Email(message = "Email should be valid")
     private String email;
@@ -23,7 +24,7 @@ public class UserDto {
     private String password;
     private String role;
     @NotBlank(message = "Mobile number is mandatory")
-    private String mobileNumber;
+    private String mobile_number;
 
     private String secondaryMobileNumber;
     private String gender;

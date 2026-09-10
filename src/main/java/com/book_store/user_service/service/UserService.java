@@ -9,6 +9,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 
@@ -67,7 +68,7 @@ public class UserService {
                 .expiresIn(jwtService.getExpirationTime() / 1000) // Convert milliseconds to seconds
                 .role(user.getRole())
                 .userId(user.getId())
-                .name(user.getName())
+                .name(user.getLast_name() != null ? (user.getFirst_name()+" "+user.getLast_name()) : user.getFirst_name())
                 .email(user.getEmail())
                 .build();
     }

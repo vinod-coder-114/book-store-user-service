@@ -34,7 +34,7 @@ public class JWTService {
         Map<String, Object> claims = Map.of(
                 "userId", user.getId(),
                 "role", user.getRole(),
-                "name", user.getName(),
+                "name", user.getFirst_name(),
                 "email", user.getEmail()
         );
 
@@ -54,7 +54,7 @@ public class JWTService {
         Map<String, Object> claims = Map.of(
                 "userId", user.getId(),
                 "role", user.getRole(),
-                "name", user.getName(),
+                "name", user.getFirst_name(),
                 "email", user.getEmail()
         );
 
