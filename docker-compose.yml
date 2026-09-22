@@ -1,0 +1,57 @@
+#version: "3.9"
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: bookstore-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-book_store}
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-Root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - bookstore-net
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-service
+    restart: unless-stopped
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: ${SERVER_PORT:-8081}
+      # Service name "mysql-db" resolves via Docker's internal DNS on bookstore-net
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE:-book_store}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Root}
+      JWT_SECRET: ${JWT_SECRET:-VpJ6yXEOXy1cwbvTF3aVYEDgLFMuuBlAvfC3OxCNxAcvj9PK9EZ3l8JwiUn4bgjm8FOz+Ll+HkYEQ4y0S/OjiQ==}
+      JWT_EXPIRATION_MILLIS: ${JWT_EXPIRATION_MILLIS:-3600000}
+      JWT_RSA_PRIVATE_KEY: ${JWT_RSA_PRIVATE_KEY:-}
+      JWT_RSA_PUBLIC_KEY: ${JWT_RSA_PUBLIC_KEY:-}
+      JWT_KEY_ID: ${JWT_KEY_ID:-user-service-key-1}
+      # Points at itself since user-service both issues and validates its own tokens.
+      JWT_JWK_SET_URI: http://user-service:8081/.well-known/jwks.json
+    ports:
+      - "${SERVER_PORT:-8081}:8081"
+    networks:
+      - bookstore-net
+
+networks:
+  bookstore-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+
